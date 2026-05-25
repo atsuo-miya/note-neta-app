@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="note ネタ帳">
+<meta name="theme-color" content="#f3f7fb">
+<title>note ネタ帳</title>
+
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%234a7ba8'/><text x='50' y='62' font-family='serif' font-size='48' fill='%23ffffff' text-anchor='middle'>n</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%234a7ba8'/><text x='50' y='62' font-family='serif' font-size='48' fill='%23ffffff' text-anchor='middle'>n</text></svg>">
+<link rel="manifest" href='data:application/json,{"name":"note ネタ帳","short_name":"note ネタ帳","start_url":".","display":"standalone","background_color":"%23f3f7fb","theme_color":"%23f3f7fb","icons":[{"src":"data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27><rect width=%27100%27 height=%27100%27 fill=%27%234a7ba8%27/><text x=%2750%27 y=%2762%27 font-family=%27serif%27 font-size=%2748%27 fill=%27%23ffffff%27 text-anchor=%27middle%27>n</text></svg>","sizes":"192x192","type":"image/svg+xml"}]}'>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Shippori+Mincho:wght@400;500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #f3f7fb;
+    --bg-soft: #e8eff7;
+    --ink: #1a3a5c;
+    --ink-soft: #3d5b7d;
+    --ink-mute: #8aa3bd;
+    --line: #d8e3ef;
+    --line-soft: #e8eef5;
+    --paper: #ffffff;
+    --accent: #4a7ba8;
+    --accent-soft: #6b9bc8;
+    --accent-deep: #3d6a93;
+    --fav: #d97757;
+    --fav-soft: #f0c4b0;
+    --done: #5a9a78;
+    --done-soft: #d5e8dc;
+    --shadow: 0 1px 2px rgba(74,123,168,0.06), 0 8px 24px rgba(74,123,168,0.08);
+    --serif-jp: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
+    --serif-en: "Cormorant Garamond", "Shippori Mincho", serif;
+    --sans: "Inter", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--serif-jp);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+  body { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+
+  header {
+    padding: 24px 24px 18px;
+    border-bottom: 1px solid var(--line);
+    background: rgba(243, 247, 251, 0.88);
+    position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  }
+  .header-inner { display: flex; align-items: baseline; justify-content: space-between; max-width: 720px; margin: 0 auto; }
+  .brand { font-family: var(--serif-en); font-size: 24px; font-weight: 400; letter-spacing: 0.08em; color: var(--ink); }
+  .brand-sub { font-family: var(--serif-jp); font-size: 11px; color: var(--ink-mute); letter-spacing: 0.3em; margin-top: 4px; }
+  .counter { font-family: var(--serif-en); font-size: 11px; color: var(--ink-mute); letter-spacing: 0.15em; }
+
+  .tabs {
+    display: flex; gap: 4px;
+    max-width: 720px; margin: 16px auto 0;
+    padding: 4px; background: var(--bg-soft); border-radius: 8px;
+  }
+  .tab {
+    flex: 1; padding: 10px 12px;
+    background: transparent; border: none;
+    font-family: var(--serif-jp); font-size: 13px; color: var(--ink-soft);
+    cursor: pointer; border-radius: 6px;
+    transition: all 0.2s ease; letter-spacing: 0.05em;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .tab.active {
+    background: var(--paper); color: var(--accent);
+    box-shadow: 0 1px 3px rgba(74,123,168,0.1); font-weight: 500;
+  }
+  .tab-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 18px; height: 18px; padding: 0 6px;
+    background: var(--bg-soft); color: var(--ink-mute);
+    font-family: var(--serif-en); font-size: 10px;
+    border-radius: 9px; letter-spacing: 0;
+  }
+  .tab.active .tab-badge { background: var(--accent); color: var(--paper); }
+
+  main { max-width: 720px; margin: 0 auto; padding: 28px 24px 120px; }
+
+  .section-label {
+    font-family: var(--serif-en); font-size: 10px;
+    letter-spacing: 0.4em; color: var(--ink-mute);
+    text-transform: uppercase; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+
+  .themes { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 36px; }
+  @media (min-width: 480px) {
+    .themes { grid-template-columns: repeat(2, 1fr); }
+    .theme-card.all { grid-column: 1 / -1; }
+  }
+  .theme-card {
+    background: var(--paper); border: 1px solid var(--line);
+    padding: 18px 20px; cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+    text-align: left; font-family: inherit; color: var(--ink);
+    border-radius: 4px;
+  }
+  .theme-card:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: var(--shadow); }
+  .theme-card.active { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+  .theme-card-num { font-family: var(--serif-en); font-size: 11px; letter-spacing: 0.2em; color: var(--ink-mute); margin-bottom: 6px; display: block; }
+  .theme-card.active .theme-card-num { color: rgba(255,255,255,0.65); }
+  .theme-card-title { font-family: var(--serif-jp); font-size: 16px; font-weight: 500; line-height: 1.45; letter-spacing: 0.02em; }
+  .theme-card-count { font-family: var(--serif-en); font-size: 10px; color: var(--ink-mute); letter-spacing: 0.15em; margin-top: 8px; display: flex; align-items: center; gap: 8px; }
+  .theme-card.active .theme-card-count { color: rgba(255,255,255,0.75); }
+  .theme-progress {
+    flex: 1; height: 2px; background: var(--line); border-radius: 1px; overflow: hidden;
+  }
+  .theme-card.active .theme-progress { background: rgba(255,255,255,0.25); }
+  .theme-progress-bar {
+    height: 100%; background: var(--done); border-radius: 1px;
+    transition: width 0.4s ease;
+  }
+  .theme-card.active .theme-progress-bar { background: rgba(255,255,255,0.9); }
+
+  .idea-stage {
+    background: var(--paper); border: 1px solid var(--line);
+    padding: 32px 26px 28px; min-height: 360px; margin-bottom: 22px;
+    position: relative; box-shadow: var(--shadow); border-radius: 4px;
+  }
+  .idea-stage::before {
+    content: ''; position: absolute;
+    top: 12px; left: 12px; right: 12px; bottom: 12px;
+    border: 1px solid var(--line-soft); pointer-events: none; border-radius: 2px;
+  }
+  .idea-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 22px; padding-bottom: 14px;
+    border-bottom: 1px solid var(--line-soft);
+    position: relative; z-index: 1;
+  }
+  .idea-theme { font-family: var(--serif-en); font-size: 10px; letter-spacing: 0.3em; color: var(--accent); text-transform: uppercase; }
+  .idea-meta-right { display: flex; align-items: center; gap: 14px; }
+  .idea-no { font-family: var(--serif-en); font-size: 28px; font-weight: 300; color: var(--ink); line-height: 1; }
+  .idea-no .hash { font-size: 14px; color: var(--ink-mute); margin-right: 2px; }
+
+  .fav-toggle, .done-toggle {
+    background: transparent; border: none; cursor: pointer;
+    padding: 6px; font-size: 22px; line-height: 1;
+    color: var(--ink-mute); transition: all 0.2s ease;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .fav-toggle:hover, .done-toggle:hover { transform: scale(1.1); }
+  .fav-toggle:active, .done-toggle:active { transform: scale(0.95); }
+  .fav-toggle.is-fav { color: var(--fav); animation: pop 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  .done-toggle { font-size: 18px; }
+  .done-toggle.is-done { color: var(--done); animation: pop 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+  /* 執筆済みネタの全体トーン */
+  .idea-card.is-done .idea-title {
+    color: var(--ink-soft);
+  }
+  .idea-card.is-done .idea-title::after {
+    content: ' ✓';
+    color: var(--done);
+    font-family: var(--serif-en);
+    font-weight: 400;
+  }
+
+  /* 執筆済みバッジ */
+  .done-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 2px 8px;
+    background: var(--done-soft); color: var(--done);
+    font-family: var(--serif-en); font-size: 9px;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    border-radius: 10px;
+    border: 1px solid var(--done);
+  }
+
+  .idea-title { font-family: var(--serif-jp); font-size: 22px; font-weight: 600; line-height: 1.5; letter-spacing: 0.01em; margin-bottom: 24px; color: var(--ink); position: relative; z-index: 1; }
+  .idea-section { margin-bottom: 20px; position: relative; z-index: 1; }
+  .idea-section-label {
+    font-family: var(--serif-en); font-size: 10px; letter-spacing: 0.35em;
+    color: var(--accent); text-transform: uppercase;
+    margin-bottom: 9px; display: flex; align-items: center; gap: 8px;
+  }
+  .idea-section-label::before { content: ''; width: 14px; height: 1px; background: var(--accent); }
+  .idea-intro { font-family: var(--serif-jp); font-size: 14px; line-height: 1.85; color: var(--ink-soft); letter-spacing: 0.02em; }
+  .idea-points { list-style: none; padding: 0; }
+  .idea-points li {
+    font-family: var(--serif-jp); font-size: 13.5px; line-height: 1.8;
+    color: var(--ink-soft); padding-left: 18px; position: relative; margin-bottom: 5px;
+  }
+  .idea-points li::before { content: '—'; position: absolute; left: 0; color: var(--accent-soft); }
+  .idea-question {
+    font-family: var(--serif-jp); font-size: 13.5px; line-height: 1.85;
+    color: var(--ink); font-style: italic;
+    padding: 14px 16px; background: var(--bg-soft);
+    border-left: 3px solid var(--accent); letter-spacing: 0.02em; border-radius: 0 3px 3px 0;
+  }
+
+  .empty-state {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 300px; text-align: center; padding: 20px;
+    position: relative; z-index: 1;
+  }
+  .empty-state-icon { font-family: var(--serif-en); font-size: 60px; font-weight: 300; color: var(--accent-soft); margin-bottom: 16px; letter-spacing: -0.02em; }
+  .empty-state-text { font-family: var(--serif-jp); font-size: 14px; color: var(--ink-mute); line-height: 1.85; letter-spacing: 0.05em; }
+
+  .fade-in { animation: fadeIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .actions { display: flex; gap: 10px; margin-bottom: 28px; }
+  .btn {
+    flex: 1; padding: 18px 20px;
+    font-family: var(--serif-jp); font-size: 14px; font-weight: 500;
+    letter-spacing: 0.15em; cursor: pointer; transition: all 0.2s ease;
+    border: 1px solid var(--accent); background: var(--accent); color: var(--paper);
+    position: relative; overflow: hidden; border-radius: 4px;
+  }
+  .btn:hover { background: var(--accent-deep); border-color: var(--accent-deep); }
+  .btn:active { transform: scale(0.98); }
+  .btn-secondary {
+    background: var(--paper); color: var(--accent); border-color: var(--accent);
+    flex: 0 0 auto; padding: 18px 22px; font-size: 16px;
+  }
+  .btn-secondary:hover { background: var(--bg-soft); }
+  .btn .arrow { font-family: var(--serif-en); margin-left: 8px; display: inline-block; transition: transform 0.2s ease; }
+  .btn:hover .arrow { transform: translateX(4px); }
+
+  .fav-list { display: flex; flex-direction: column; gap: 8px; }
+  .fav-item {
+    background: var(--paper); border: 1px solid var(--line); border-radius: 4px;
+    padding: 14px 16px;
+    display: flex; align-items: flex-start; gap: 12px;
+    cursor: pointer; transition: all 0.2s ease;
+  }
+  .fav-item:hover { border-color: var(--accent); box-shadow: var(--shadow); transform: translateY(-1px); }
+  .fav-item-body { flex: 1; min-width: 0; }
+  .fav-item-meta { display: flex; gap: 8px; align-items: baseline; margin-bottom: 4px; flex-wrap: wrap; }
+  .fav-item-theme { font-family: var(--serif-en); font-size: 9px; letter-spacing: 0.25em; color: var(--accent); text-transform: uppercase; }
+  .fav-item-no { font-family: var(--serif-en); font-size: 11px; color: var(--ink-mute); }
+  .fav-item-title { font-family: var(--serif-jp); font-size: 14.5px; font-weight: 500; line-height: 1.5; color: var(--ink); }
+  .fav-item-remove {
+    background: transparent; border: none; cursor: pointer;
+    color: var(--ink-mute); font-size: 18px; padding: 4px 8px; line-height: 1;
+    transition: color 0.2s ease; flex-shrink: 0;
+  }
+  .fav-item-remove:hover { color: var(--fav); }
+  .fav-empty {
+    text-align: center; padding: 60px 20px; color: var(--ink-mute);
+    font-family: var(--serif-jp); font-size: 13px; line-height: 1.85;
+    background: var(--paper); border: 1px dashed var(--line); border-radius: 4px;
+  }
+  .fav-empty-icon { font-size: 32px; color: var(--fav-soft); margin-bottom: 12px; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink); color: var(--paper);
+    padding: 12px 22px; border-radius: 24px;
+    font-family: var(--serif-jp); font-size: 13px; letter-spacing: 0.05em;
+    box-shadow: 0 8px 24px rgba(26,58,92,0.25);
+    opacity: 0; pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); z-index: 100;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .install-hint {
+    text-align: center; padding: 16px;
+    font-family: var(--serif-jp); font-size: 11px; color: var(--ink-mute);
+    letter-spacing: 0.1em; line-height: 1.85;
+    border-top: 1px solid var(--line-soft); margin-top: 24px;
+  }
+  .install-hint kbd {
+    font-family: var(--sans); font-size: 10px;
+    padding: 2px 6px; background: var(--paper); border: 1px solid var(--line);
+    border-radius: 3px; margin: 0 2px; color: var(--ink-soft);
+  }
+
+  footer { text-align: center; padding: 20px; font-family: var(--serif-en); font-size: 10px; color: var(--ink-mute); letter-spacing: 0.3em; }
+  .ornament { text-align: center; font-family: var(--serif-en); color: var(--accent-soft); font-size: 14px; letter-spacing: 1em; margin: 6px 0 22px; opacity: 0.55; }
+
+  @media (max-width: 480px) {
+    header { padding: 18px 18px 14px; }
+    main { padding: 24px 18px 100px; }
+    .idea-stage { padding: 26px 22px 22px; }
+    .idea-title { font-size: 19px; }
+    .btn { font-size: 13px; padding: 16px 18px; }
+    .brand { font-size: 21px; }
+    .tabs { margin-top: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <div class="brand">note ideas</div>
+      <div class="brand-sub">ネ タ 帳</div>
+    </div>
+    <div class="counter" id="counter">— / —</div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-view="random"><span>ネタを引く</span></button>
+    <button class="tab" data-view="favorites">
+      <span>お気に入り</span>
+      <span class="tab-badge" id="favBadge">0</span>
+    </button>
+    <button class="tab" data-view="done">
+      <span>執筆済み</span>
+      <span class="tab-badge" id="doneBadge">0</span>
+    </button>
+  </div>
+</header>
+
+<main>
+  <section id="randomView">
+    <div class="section-label">Theme</div>
+    <div class="themes" id="themes"></div>
+
+    <div class="section-label">Idea</div>
+    <div class="ornament">· · ·</div>
+    <div class="idea-stage" id="ideaStage">
+      <div class="empty-state">
+        <div class="empty-state-icon">✎</div>
+        <div class="empty-state-text">テーマを選んで<br>「ネタを引く」を押してください</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" id="drawBtn">ネ タ を 引 く<span class="arrow">→</span></button>
+      <button class="btn btn-secondary" id="copyBtn" title="コピー" aria-label="クリップボードにコピー">⎘</button>
+    </div>
+
+    <div class="install-hint">
+      ホーム画面に追加するには<br>
+      iOS: 共有 → <kbd>ホーム画面に追加</kbd><br>
+      Android: メニュー → <kbd>ホーム画面に追加</kbd>
+    </div>
+  </section>
+
+  <section id="favoritesView" style="display:none;">
+    <div class="section-label">Favorites</div>
+    <div id="favList"></div>
+  </section>
+
+  <section id="doneView" style="display:none;">
+    <div class="section-label">Done</div>
+    <div id="doneList"></div>
+  </section>
+</main>
+
+<footer>EST. 2026</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DATA = {
+  themes: [
+    {
+      id: 'camera',
+      name: 'SONYカメラ・動画・写真・S-Log',
+      ideas: [
+        { n: 1, title: 'S-Logは難しくない、たぶん', intro: 'S-Logと聞くと身構える人が多いけれど、実は「後で味付けする前提の素材」という考え方さえ掴めば怖くない。', points: ['S-Logが「眠い映像」に見える本当の理由', '撮影時に意識すべき露出の基準(+1〜2EV)', '最初の一歩としてのLUT当ての習慣化'], q: 'あなたが最初にS-Logで撮ったとき、いちばん戸惑ったポイントは何でしたか?' },
+        { n: 2, title: 'SONY機を選び続ける個人的な理由', intro: '他社の良さも知った上で、それでも私はSONYに戻ってくる。その理由を正直に書いてみたい。', points: ['AF性能が現場の心理的余裕を生む話', 'レンズ資産の積み上がり方', '動画と写真のハイブリッド運用での強み'], q: 'あなたがカメラメーカーを選ぶとき、決め手になっているのは何ですか?' },
+        { n: 3, title: '露出は「正解」より「意図」', intro: '適正露出という言葉に縛られていた頃の自分に、いま伝えたいことがある。', points: ['ヒストグラムを読むより大切なこと', 'S-Logでの「右寄せ」の実際の塩梅', '失敗を恐れず意図的にズラす練習法'], q: 'あなたは撮影中、どんな指標で露出を決めていますか?' },
+        { n: 4, title: '動画と写真、頭の切り替え方', intro: '同じカメラでも、動画モードと写真モードでは脳の使い方がまったく違う。', points: ['「瞬間」を捉える写真の思考', '「時間」を編む動画の思考', '一日のうちで両方撮るときのコツ'], q: 'あなたは動画派ですか、写真派ですか? その理由も聞かせてください。' },
+        { n: 5, title: 'はじめてのカラーグレーディング', intro: 'S-Logで撮った素材を前にして、固まってしまった日のことを今でも覚えている。', points: ['LUTを当てるだけで終わらせない発想', '色の三要素(露出・コントラスト・彩度)の順番', '「やりすぎ」を見抜くチェック方法'], q: 'カラーグレーディングで一番難しいと感じる工程はどこですか?' },
+        { n: 6, title: 'AFを信じる勇気、信じない判断', intro: 'SONYのAFは賢い。でも、それを盲信した日に限って痛い目を見る。', points: ['AF任せでうまくいくシチュエーション', 'MFに切り替えるべき瞬間の見極め', '被写体認識を過信しないための保険'], q: 'AFの誤作動で「やられた」経験はありますか?' },
+        { n: 7, title: 'レンズ沼に落ちる前に読んでほしい', intro: 'レンズは多ければ多いほど良い、というのは半分本当で半分嘘だ。', points: ['最初の3本でカバーできる範囲', '「役割が重複するレンズ」を持つ無駄', '売却タイミングを逃さないコツ'], q: '今いちばん手放せないレンズは何ですか?' },
+        { n: 8, title: '4K・8K時代の撮影現場で起きていること', intro: '高解像度は正義だと思っていた頃の自分に、現場のリアルを教えてあげたい。', points: ['ストレージとPCへの本当の負担', 'クライアントが求める解像度の実態', '「8Kで撮る意味」が生まれる瞬間'], q: 'あなたの普段の撮影は、どの解像度がメインですか?' },
+        { n: 9, title: '手ブレ補正、頼りすぎてないか', intro: '強力な手ブレ補正は救世主だが、基礎を学ぶ機会を奪う側面もある。', points: ['補正に頼らないホールディング', '三脚・ジンバルを使い分ける基準', '「揺れ」を意図的に残す表現'], q: '手持ち撮影で、自分なりに編み出した工夫はありますか?' },
+        { n: 10, title: 'プロファイルの選び方、結局どれ?', intro: 'S-Log・S-Cinetone・HLG・通常プロファイル。迷子になっている人へ向けた現場目線の整理。', points: ['編集前提ならS-Log、納品早めならS-Cinetone', 'HLGが活きる配信用途', '案件ごとの「使い分け表」を持つ意味'], q: 'あなたは普段どのプロファイルで撮影していますか?' },
+        { n: 11, title: 'SDカードで泣いた日の話', intro: '機材に投資する人ほど、メディアへの投資を後回しにしがちだ。', points: ['速度規格を読み解く最低限の知識', 'バックアップ運用のルーティン化', 'データ消失リスクと向き合うコスト感'], q: 'SDカードや記録メディアで、ヒヤッとした経験はありますか?' },
+        { n: 12, title: '写真からの動画転向で気づいたこと', intro: '写真の作法のまま動画を撮ると、思った以上に違和感のある絵になる。', points: ['シャッタースピードの「180度ルール」', 'フレーミングの動きと余白の扱い', '「決定的瞬間」より「一連の流れ」へ'], q: '写真と動画、両方を学んでいて気づいた違いはありますか?' },
+        { n: 13, title: '機材を増やす前に磨くべき技術', intro: '新しいレンズより、今あるレンズの使いこなしのほうが伸びしろが大きい場合がある。', points: ['焦点距離を縛って撮る練習', '同じ被写体を10通り撮る訓練', '機材レビューを見る前に立ち止まる習慣'], q: 'あなたが「機材より腕」と実感した瞬間はありますか?' },
+        { n: 14, title: 'SONY α7Sシリーズの暗所性能を語りたい', intro: '暗いところで撮れる、というだけでは伝わらないこのカメラの魅力。', points: ['ISO感度を上げても破綻しない安心感', '暗所での表現の幅が広がる体験', '弱点も含めた率直な評価'], q: '暗いシーンでの撮影、いちばん困るのはどんな場面ですか?' },
+        { n: 15, title: '編集に時間がかかりすぎる人へ', intro: '撮影は楽しいのに編集が憂鬱、という人は多い。原因は段取りにあるかもしれない。', points: ['撮影時に編集を意識する習慣', 'フォルダ構成とファイル命名の重要性', '「完璧」を諦める基準づくり'], q: '編集で一番時間を食っている工程はどこですか?' },
+        { n: 16, title: 'カメラ越しに見える世界が変わった話', intro: '技術的な話ばかりしてきたけれど、結局カメラは「世界の見方」を変える道具だと思う。', points: ['日常の光に敏感になる感覚', '何気ない場面に物語を見出す習慣', '撮らない時間も豊かにしてくれる存在'], q: 'カメラを始めてから、変わった日常の感覚はありますか?' }
+      ]
+    },
+    {
+      id: 'mac',
+      name: 'Mac',
+      ideas: [
+        { n: 1, title: 'Macに乗り換えて2年、本音を書く', intro: '「Macは良いよ」という言葉だけでは伝わらない、移行後のリアルを正直に。', points: ['期待を超えた点・期待外れだった点', 'Windowsで困らなかったことが困る瞬間', 'それでも戻れなくなった理由'], q: 'Macへの乗り換えを迷っている方、何が一番不安ですか?' },
+        { n: 2, title: 'MacBook ProとMac Studio、使い分けの実際', intro: '両方を持つ贅沢、という話ではなく「役割分担」という現実的な話をしたい。', points: ['持ち出しと据え置きの境界線', '動画編集での負荷の違い', '一台に絞れない仕事の構造'], q: 'あなたはノートとデスクトップ、どう使い分けていますか?' },
+        { n: 3, title: 'Mシリーズチップの「速い」の正体', intro: 'ベンチマークの数字ではなく、日々の作業で体感する速さの話をしてみたい。', points: ['起動と復帰のストレスがゼロになる感覚', '重い処理中も他作業ができる余裕', 'ファンが回らない静けさの価値'], q: 'あなたが「速い」と感じるのは、PCのどんな瞬間ですか?' },
+        { n: 4, title: 'メモリは何GB必要か、を真面目に考える', intro: '「とりあえず多めに」が正解とは限らない。用途別に冷静に考えてみよう。', points: ['16GB/32GB/64GB/128GBの境界線', '動画編集での実際の使用量', '将来の用途を見越した投資判断'], q: 'あなたのMacのメモリ容量、足りていますか?' },
+        { n: 5, title: '動画編集者から見たMac Studioの実力', intro: '4K・8K素材を相手にしてきた立場から、Mac Studioの真価を語ってみたい。', points: ['M4 Maxで体感した編集速度の変化', 'カラーグレーディング時の安定感', '投資対効果として見たときの判断'], q: '高性能機への投資、どんな基準で踏み切りましたか?' },
+        { n: 6, title: '周辺機器でMac体験は変わる', intro: '本体の性能だけでは引き出せない快適さが、周辺機器の選択で大きく変わる。', points: ['モニターのスペックとMacの相性', '外付けSSDの速度規格の選び方', 'ハブ・ドックの落とし穴'], q: 'あなたが「これは買ってよかった」と思うMac周辺機器は?' },
+        { n: 7, title: 'macOSの隠れた便利機能たち', intro: '使い始めて何年経っても、「そんな機能あったの?」と驚くことがある。', points: ['ショートカット.appの活用法', 'ステージマネージャの使いどころ', 'スポットライトを電卓・換算機として使う'], q: 'あなたが最近知って感動したmacOSの機能はありますか?' },
+        { n: 8, title: 'Apple Siliconで動かないアプリ、もう怖くない', intro: '移行初期の悩みも、いまや過去の話になりつつある。', points: ['Rosetta 2が支えてきた数年間', 'ネイティブ対応が進んだ主要アプリ', 'それでも残る互換性の壁'], q: 'あなたが「これがネイティブ対応してほしい」と思うアプリは?' },
+        { n: 9, title: 'Macで効率が上がるアプリ厳選', intro: '星の数ほどあるMacアプリの中から、本当に手放せないものだけを紹介したい。', points: ['ランチャー系(Raycastなど)の体験', 'クリップボード管理ツールの威力', 'ウィンドウ管理アプリの効用'], q: 'あなたのMacに必ず入れているアプリは何ですか?' },
+        { n: 10, title: 'Macの寿命、何年使うのが正解か', intro: '「長く使えるから結局お得」という言葉の、もう少し踏み込んだ話。', points: ['OSサポート期間の現実', '用途別の買い替えタイミング', '中古市場での価値の落ちにくさ'], q: 'あなたが使っているMacは、購入から何年経ちましたか?' },
+        { n: 11, title: 'WindowsからMacへ、移行のリアル', intro: '操作性の違いより、もっと根本的なところでつまずく人を何人も見てきた。', points: ['キーボードショートカットの再学習', 'ファイル管理の思想の違い', '業務アプリの代替を探す現実'], q: 'Macへの移行で、最初に戸惑ったことは何でしたか?' },
+        { n: 12, title: '外でMacを使うときの工夫', intro: 'カフェやコワーキングで作業するとき、ちょっとした準備が快適さを決める。', points: ['バッテリー運用の現実的な持ち時間', 'セキュリティと覗き見対策', '周囲との関係を意識した使い方'], q: 'あなたが外で作業するとき、必ず持っていくものは?' },
+        { n: 13, title: 'Mac購入で後悔しないためのチェックリスト', intro: '「もう少し上のグレードにしておけば」という後悔は、買い物の中でも特に苦い。', points: ['用途を3年スパンで考える', 'ストレージは増設できない前提', '為替・タイミング・新製品サイクル'], q: 'Mac選びで、後悔した・しなかったポイントは何ですか?' },
+        { n: 14, title: 'クリエイティブワークとMacの相性', intro: '「Mac=クリエイター向け」は本当か、もう一度自分の目で確かめてみた。', points: ['色再現性とディスプレイの信頼感', 'プロアプリのMac版・Windows版の差', '同業者との共通基盤としての価値'], q: 'あなたの仕事でMacが向いている・向いていない場面は?' },
+        { n: 15, title: 'WWDCの夜、毎年眠れない理由', intro: '新製品の噂を追いかけ、発表の瞬間に立ち会う。この時間が好きだ。', points: ['何を発表する場なのかの整理', '個人的に注目しているポイント', '発表後に冷静になって判断する習慣'], q: 'あなたが今年のWWDCで期待していることは?' },
+        { n: 16, title: 'Macに支えられた仕事と暮らし', intro: '道具の話のつもりが、いつの間にか自分の働き方の話になっていた。', points: ['朝の起動からの一日の流れ', 'Macがいなかったら成立しない業務', '「相棒」と呼べる感覚の正体'], q: 'あなたにとってのMacは、どんな存在ですか?' }
+      ]
+    },
+    {
+      id: 'tannisho',
+      name: '親鸞の歎異抄',
+      ideas: [
+        { n: 1, title: '歎異抄をはじめて読む人へ', intro: '難しそうに見えて、実はとても人間くさい。歎異抄との出会い直しを提案したい。', points: ['著者は親鸞ではなく弟子の唯円', '「異なるを歎く」というタイトルの意味', 'どの章から読んでも構わない自由さ'], q: 'あなたが歎異抄を知ったきっかけは何でしたか?' },
+        { n: 2, title: '「善人なほもて往生をとぐ」の衝撃', intro: '常識を裏返すこの一節に、初めて触れたときの戸惑いを忘れられない。', points: ['普通の感覚との真逆の構造', '「悪人」という言葉の本来の意味', '自力と他力の決定的な違い'], q: 'この一節を読んで、あなたはどう感じましたか?' },
+        { n: 3, title: '信じることの難しさを語る', intro: '信じるとは何か、という問いに親鸞は驚くほど誠実に向き合っていた。', points: ['「信じよう」とすることの矛盾', '念仏が「贈り物」として届く構造', '信じきれない自分との付き合い方'], q: 'あなたにとって「信じる」とは、どんな感覚ですか?' },
+        { n: 4, title: '親鸞の正直さに救われる', intro: '聖人と呼ばれた人の、こんなにも揺れる言葉。だからこそ近くに感じられる。', points: ['「念仏申し候へども」の率直さ', '喜べない自分を認める強さ', '正直であることが信仰になる逆説'], q: 'あなたが「正直さに救われた」経験はありますか?' },
+        { n: 5, title: '現代社会で歎異抄を読む意味', intro: '800年前の言葉が、なぜいまも刺さるのか。その理由を考えてみたい。', points: ['「自力」を称賛する社会との対比', '効率と成果の世界に開ける別の窓', '弱さを抱えたままでいい、という許し'], q: '現代に生きるあなたが、歎異抄に惹かれる理由は?' },
+        { n: 6, title: '「念仏は無義をもて義とす」を解きほぐす', intro: '意味がないことが意味になる、というパラドックスをどう受け取るか。', points: ['「義」という言葉の二重性', '計らいを手放すという経験', '言葉で説明しきれない領域の話'], q: 'あなたが「計らいを手放した」と感じた瞬間はありますか?' },
+        { n: 7, title: '親鸞が妻帯した意味を考える', intro: '僧侶でありながら妻を持ち、子を育てた人。その選択の重みを想像してみる。', points: ['当時の戒律と社会の常識', '「在家のまま救われる」という思想', '暮らしの中にある宗教性'], q: 'あなたは「日常の中の信仰」をどう考えますか?' },
+        { n: 8, title: '唯円という人物に光を当てる', intro: '歎異抄を書き残した弟子・唯円。彼がいなければ、私たちはこの本を読めなかった。', points: ['なぜ唯円が筆をとったのか', '師の言葉を伝える責任感', '「異なるを歎く」覚悟の重さ'], q: 'あなたが「誰かの言葉を伝えたい」と思った経験はありますか?' },
+        { n: 9, title: '悪人正機説、誤解されすぎている', intro: '「悪いことをしても救われる」と読むのは、根本的な誤読だと思う。', points: ['「悪人」とは誰のことか', '自力で善をなせると思う傲慢', '自分の弱さを直視する出発点'], q: 'あなたはこの説を、どう理解していますか?' },
+        { n: 10, title: '第九条、喜べない自分について', intro: '「念仏申し候へども、踊躍歓喜の心おろそかに候こと」——この一節が好きだ。', points: ['喜べない自分を責めなくていい', '親鸞自身もそうだったという告白', '「だからこそ」救われる構造'], q: '「喜べない自分」を抱えた経験はありますか?' },
+        { n: 11, title: '浄土真宗と他の仏教の違い', intro: '修行する仏教と、修行しない仏教。その違いは思想の根っこから来ている。', points: ['自力門と他力門という分類', '鎌倉新仏教における位置づけ', '「凡夫のための仏教」という発想'], q: 'あなたは仏教の各宗派について、どう捉えていますか?' },
+        { n: 12, title: '歎異抄が禁書だった時代', intro: 'あまりに過激な内容ゆえに、長く封印されていた本——その歴史も知っておきたい。', points: ['蓮如による「無宿善の機」への警戒', '明治期の再発見と西田幾多郎の影響', '現代まで残されたことの幸運'], q: '禁書の歴史を知って、読み方は変わりましたか?' },
+        { n: 13, title: '死を前にした人と歎異抄', intro: '人生の終わりが見えてきたとき、なぜか歎異抄に惹かれる人が多いと聞く。', points: ['「往生」という言葉の意味の深さ', '死を受け入れる思想的支え', '残される人にとっての慰め'], q: 'あなたが「死」について考えるとき、よりどころにしているものは?' },
+        { n: 14, title: '私が歎異抄に出会った日', intro: '本との出会いには、必ず何かのタイミングが用意されているのだと思う。', points: ['手に取ったときの自分の状態', '最初に響いた一節', '読み返すたびに変わる印象'], q: 'あなたを変えた一冊との出会いを教えてください。' },
+        { n: 15, title: '「念仏」を現代語で考えてみる', intro: '南無阿弥陀仏、と唱える。その行為を現代の言葉で言い直すとどうなるか。', points: ['「お任せします」という根本姿勢', '言葉を発することの身体性', '形式を守ることの意味'], q: 'あなたにとって、祈ることや唱えることの意味は?' },
+        { n: 16, title: '歎異抄を読む、ということ', intro: '何度読んでも新しい発見がある。古典とはそういうものだと、この本が教えてくれた。', points: ['一回目と十回目で違う場所が光る', '自分の人生の段階と響き合う言葉', '「読み終わらない」本との付き合い方'], q: '何度も読み返している本は、あなたにとってどんな存在ですか?' }
+      ]
+    }
+  ]
+};
+
+let selectedThemeId = 'all';
+let currentIdea = null;
+let history = [];
+let favorites = loadList('note-ideas-favs-v1');
+let dones = loadList('note-ideas-dones-v1');
+let currentView = 'random';
+
+const themesEl = document.getElementById('themes');
+const ideaStageEl = document.getElementById('ideaStage');
+const drawBtn = document.getElementById('drawBtn');
+const copyBtn = document.getElementById('copyBtn');
+const counterEl = document.getElementById('counter');
+const favBadgeEl = document.getElementById('favBadge');
+const doneBadgeEl = document.getElementById('doneBadge');
+const toastEl = document.getElementById('toast');
+const randomViewEl = document.getElementById('randomView');
+const favoritesViewEl = document.getElementById('favoritesView');
+const doneViewEl = document.getElementById('doneView');
+const favListEl = document.getElementById('favList');
+const doneListEl = document.getElementById('doneList');
+
+function loadList(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch { return []; }
+}
+function saveList(key, list) {
+  try { localStorage.setItem(key, JSON.stringify(list)); }
+  catch (e) { console.warn('保存に失敗:', e); }
+}
+function isFav(themeId, n) {
+  return favorites.some(f => f.themeId === themeId && f.n === n);
+}
+function isDone(themeId, n) {
+  return dones.some(d => d.themeId === themeId && d.n === n);
+}
+function toggleFav(themeId, n) {
+  if (isFav(themeId, n)) {
+    favorites = favorites.filter(f => !(f.themeId === themeId && f.n === n));
+    showToast('お気に入りから外しました');
+  } else {
+    favorites.push({ themeId, n });
+    showToast('♥ お気に入りに追加しました');
+  }
+  saveList('note-ideas-favs-v1', favorites);
+  updateBadges();
+  if (currentView === 'favorites') renderFavorites();
+}
+function toggleDone(themeId, n) {
+  if (isDone(themeId, n)) {
+    dones = dones.filter(d => !(d.themeId === themeId && d.n === n));
+    showToast('執筆済みを取り消しました');
+  } else {
+    dones.push({ themeId, n, doneAt: Date.now() });
+    showToast('✓ 執筆済みにしました');
+  }
+  saveList('note-ideas-dones-v1', dones);
+  updateBadges();
+  renderThemes(); // 進捗バー更新
+  if (currentView === 'done') renderDones();
+  if (currentView === 'favorites') renderFavorites(); // お気に入り側のバッジも更新
+}
+function updateBadges() {
+  favBadgeEl.textContent = favorites.length;
+  doneBadgeEl.textContent = dones.length;
+}
+
+let toastTimer = null;
+function showToast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function renderThemes() {
+  const totalIdeas = DATA.themes.reduce((s, t) => s + t.ideas.length, 0);
+  const totalDones = dones.length;
+  const allPct = totalIdeas > 0 ? (totalDones / totalIdeas) * 100 : 0;
+  let html = `
+    <button class="theme-card all ${selectedThemeId === 'all' ? 'active' : ''}" data-id="all">
+      <span class="theme-card-num">00</span>
+      <div class="theme-card-title">すべてのテーマから</div>
+      <div class="theme-card-count">
+        <span>${totalDones} / ${totalIdeas}</span>
+        <span class="theme-progress"><span class="theme-progress-bar" style="width:${allPct}%"></span></span>
+      </div>
+    </button>
+  `;
+  DATA.themes.forEach((theme, i) => {
+    const num = String(i + 1).padStart(2, '0');
+    const doneCount = dones.filter(d => d.themeId === theme.id).length;
+    const pct = theme.ideas.length > 0 ? (doneCount / theme.ideas.length) * 100 : 0;
+    html += `
+      <button class="theme-card ${selectedThemeId === theme.id ? 'active' : ''}" data-id="${theme.id}">
+        <span class="theme-card-num">${num}</span>
+        <div class="theme-card-title">${escapeHtml(theme.name)}</div>
+        <div class="theme-card-count">
+          <span>${doneCount} / ${theme.ideas.length}</span>
+          <span class="theme-progress"><span class="theme-progress-bar" style="width:${pct}%"></span></span>
+        </div>
+      </button>
+    `;
+  });
+  themesEl.innerHTML = html;
+  themesEl.querySelectorAll('.theme-card').forEach(card => {
+    card.addEventListener('click', () => {
+      selectedThemeId = card.dataset.id;
+      renderThemes();
+      updateCounter();
+    });
+  });
+  updateCounter();
+}
+
+function updateCounter() {
+  if (selectedThemeId === 'all') {
+    const total = DATA.themes.reduce((s, t) => s + t.ideas.length, 0);
+    counterEl.textContent = `${dones.length} / ${total}`;
+  } else {
+    const theme = DATA.themes.find(t => t.id === selectedThemeId);
+    const doneCount = dones.filter(d => d.themeId === selectedThemeId).length;
+    counterEl.textContent = `${doneCount} / ${theme.ideas.length}`;
+  }
+}
+
+function getAvailableIdeas() {
+  if (selectedThemeId === 'all') {
+    const pool = [];
+    DATA.themes.forEach(theme => {
+      theme.ideas.forEach(idea => {
+        pool.push({ ...idea, themeName: theme.name, themeId: theme.id });
+      });
+    });
+    return pool;
+  } else {
+    const theme = DATA.themes.find(t => t.id === selectedThemeId);
+    return theme.ideas.map(i => ({ ...i, themeName: theme.name, themeId: theme.id }));
+  }
+}
+
+function drawIdea() {
+  const pool = getAvailableIdeas();
+  if (pool.length === 0) return;
+  const recentLimit = Math.min(10, Math.floor(pool.length * 0.7));
+  let candidates = pool.filter(i => !history.some(h => h.themeId === i.themeId && h.n === i.n));
+  if (candidates.length === 0) { history = []; candidates = pool; }
+  const idea = candidates[Math.floor(Math.random() * candidates.length)];
+  currentIdea = idea;
+  history.push({ themeId: idea.themeId, n: idea.n });
+  if (history.length > recentLimit) history.shift();
+  renderIdea(idea);
+}
+
+function renderIdea(idea) {
+  const num = String(idea.n).padStart(2, '0');
+  const pointsHtml = idea.points.map(p => `<li>${escapeHtml(p)}</li>`).join('');
+  const faved = isFav(idea.themeId, idea.n);
+  const done = isDone(idea.themeId, idea.n);
+  ideaStageEl.innerHTML = `
+    <div class="idea-card fade-in ${done ? 'is-done' : ''}">
+      <div class="idea-meta">
+        <span class="idea-theme">${escapeHtml(idea.themeName)}</span>
+        <div class="idea-meta-right">
+          <span class="idea-no"><span class="hash">№</span>${num}</span>
+          <button class="done-toggle ${done ? 'is-done' : ''}" aria-label="執筆済みにする" aria-pressed="${done}" title="執筆済み">
+            ${done ? '✓' : '○'}
+          </button>
+          <button class="fav-toggle ${faved ? 'is-fav' : ''}" aria-label="お気に入りに追加" aria-pressed="${faved}" title="お気に入り">
+            ${faved ? '♥' : '♡'}
+          </button>
+        </div>
+      </div>
+      <h2 class="idea-title">${escapeHtml(idea.title)}</h2>
+      <div class="idea-section">
+        <div class="idea-section-label">Intro</div>
+        <p class="idea-intro">${escapeHtml(idea.intro)}</p>
+      </div>
+      <div class="idea-section">
+        <div class="idea-section-label">Points</div>
+        <ul class="idea-points">${pointsHtml}</ul>
+      </div>
+      <div class="idea-section">
+        <div class="idea-section-label">Question</div>
+        <p class="idea-question">${escapeHtml(idea.q)}</p>
+      </div>
+    </div>
+  `;
+  const favBtn = ideaStageEl.querySelector('.fav-toggle');
+  favBtn.addEventListener('click', () => {
+    toggleFav(idea.themeId, idea.n);
+    const nowFav = isFav(idea.themeId, idea.n);
+    favBtn.classList.toggle('is-fav', nowFav);
+    favBtn.textContent = nowFav ? '♥' : '♡';
+    favBtn.setAttribute('aria-pressed', nowFav);
+  });
+  const doneBtn = ideaStageEl.querySelector('.done-toggle');
+  doneBtn.addEventListener('click', () => {
+    toggleDone(idea.themeId, idea.n);
+    const nowDone = isDone(idea.themeId, idea.n);
+    doneBtn.classList.toggle('is-done', nowDone);
+    doneBtn.textContent = nowDone ? '✓' : '○';
+    doneBtn.setAttribute('aria-pressed', nowDone);
+    ideaStageEl.querySelector('.idea-card').classList.toggle('is-done', nowDone);
+  });
+}
+
+function renderFavorites() {
+  if (favorites.length === 0) {
+    favListEl.innerHTML = `
+      <div class="fav-empty">
+        <div class="fav-empty-icon">♡</div>
+        まだお気に入りはありません<br>
+        ネタを開いて<strong>♡</strong>をタップすると登録されます
+      </div>
+    `;
+    return;
+  }
+  const items = [...favorites].reverse().map(f => {
+    const theme = DATA.themes.find(t => t.id === f.themeId);
+    if (!theme) return '';
+    const idea = theme.ideas.find(i => i.n === f.n);
+    if (!idea) return '';
+    const num = String(idea.n).padStart(2, '0');
+    const done = isDone(f.themeId, f.n);
+    return `
+      <div class="fav-item" data-theme="${f.themeId}" data-n="${f.n}">
+        <div class="fav-item-body">
+          <div class="fav-item-meta">
+            <span class="fav-item-theme">${escapeHtml(theme.name)}</span>
+            <span class="fav-item-no">№${num}</span>
+            ${done ? '<span class="done-badge">✓ 執筆済</span>' : ''}
+          </div>
+          <div class="fav-item-title">${escapeHtml(idea.title)}</div>
+        </div>
+        <button class="fav-item-remove" aria-label="お気に入り解除" title="お気に入り解除">×</button>
+      </div>
+    `;
+  }).join('');
+  favListEl.innerHTML = `<div class="fav-list">${items}</div>`;
+  favListEl.querySelectorAll('.fav-item').forEach(el => {
+    const themeId = el.dataset.theme;
+    const n = Number(el.dataset.n);
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.fav-item-remove')) return;
+      openIdea(themeId, n);
+    });
+    el.querySelector('.fav-item-remove').addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFav(themeId, n);
+    });
+  });
+}
+
+function renderDones() {
+  if (dones.length === 0) {
+    doneListEl.innerHTML = `
+      <div class="fav-empty">
+        <div class="fav-empty-icon" style="color: var(--done-soft);">✓</div>
+        まだ執筆済みのネタはありません<br>
+        ネタを開いて<strong>○</strong>をタップすると記録されます
+      </div>
+    `;
+    return;
+  }
+  // テーマごとにグループ化、新しい執筆順に
+  const sorted = [...dones].sort((a, b) => (b.doneAt || 0) - (a.doneAt || 0));
+  const items = sorted.map(d => {
+    const theme = DATA.themes.find(t => t.id === d.themeId);
+    if (!theme) return '';
+    const idea = theme.ideas.find(i => i.n === d.n);
+    if (!idea) return '';
+    const num = String(idea.n).padStart(2, '0');
+    const dateStr = d.doneAt ? formatDate(d.doneAt) : '';
+    return `
+      <div class="fav-item" data-theme="${d.themeId}" data-n="${d.n}">
+        <div class="fav-item-body">
+          <div class="fav-item-meta">
+            <span class="fav-item-theme">${escapeHtml(theme.name)}</span>
+            <span class="fav-item-no">№${num}</span>
+            ${dateStr ? `<span class="fav-item-no">${dateStr}</span>` : ''}
+          </div>
+          <div class="fav-item-title">${escapeHtml(idea.title)}</div>
+        </div>
+        <button class="fav-item-remove done-remove" aria-label="執筆済み解除" title="執筆済み解除">×</button>
+      </div>
+    `;
+  }).join('');
+  doneListEl.innerHTML = `<div class="fav-list">${items}</div>`;
+  doneListEl.querySelectorAll('.fav-item').forEach(el => {
+    const themeId = el.dataset.theme;
+    const n = Number(el.dataset.n);
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.fav-item-remove')) return;
+      openIdea(themeId, n);
+    });
+    el.querySelector('.fav-item-remove').addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleDone(themeId, n);
+    });
+  });
+}
+
+function formatDate(ts) {
+  const d = new Date(ts);
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}.${m}.${day}`;
+}
+
+function openIdea(themeId, n) {
+  const theme = DATA.themes.find(t => t.id === themeId);
+  if (!theme) return;
+  const idea = theme.ideas.find(i => i.n === n);
+  if (!idea) return;
+  currentIdea = { ...idea, themeName: theme.name, themeId: theme.id };
+  switchView('random');
+  renderIdea(currentIdea);
+  setTimeout(() => {
+    ideaStageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 50);
+}
+
+function switchView(view) {
+  currentView = view;
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.view === view);
+  });
+  randomViewEl.style.display = (view === 'random') ? '' : 'none';
+  favoritesViewEl.style.display = (view === 'favorites') ? '' : 'none';
+  doneViewEl.style.display = (view === 'done') ? '' : 'none';
+  if (view === 'favorites') renderFavorites();
+  if (view === 'done') renderDones();
+}
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => switchView(tab.dataset.view));
+});
+
+function copyIdea() {
+  if (!currentIdea) { showToast('先にネタを引いてください'); return; }
+  const text = [
+    `【${currentIdea.themeName}】No.${currentIdea.n}`,
+    `タイトル: ${currentIdea.title}`, ``,
+    `■導入文`, currentIdea.intro, ``,
+    `■書くべきポイント`,
+    ...currentIdea.points.map(p => `・${p}`), ``,
+    `■問いかけ`, currentIdea.q
+  ].join('\n');
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(
+      () => showToast('✓ コピーしました'),
+      () => fallbackCopy(text)
+    );
+  } else {
+    fallbackCopy(text);
+  }
+}
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); showToast('✓ コピーしました'); }
+  catch { showToast('コピーに失敗しました'); }
+  document.body.removeChild(ta);
+}
+
+drawBtn.addEventListener('click', drawIdea);
+copyBtn.addEventListener('click', copyIdea);
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space' && document.activeElement.tagName !== 'BUTTON' && currentView === 'random') {
+    e.preventDefault();
+    drawIdea();
+  }
+});
+
+renderThemes();
+updateBadges();
+</script>
+
+</body>
+</html>
